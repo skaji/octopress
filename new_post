@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ $# != 1 ]; then
+    echo "Specify titile!" >&2
+    exit 1
+fi
+
+exec bundle exec rake new_post[$1]
