@@ -1,6 +1,8 @@
 ## install
 
-    git clone --recursive git@github.com:shoichikaji/octopress.git
+    git clone --recursive -o source git@github.com:shoichikaji/octopress.git
+    cd octopress
+    git clone git@github.com:shoichikaji/shoichikaji.github.io.git _deploy
     bundle install
 
 ## new post
@@ -14,4 +16,5 @@
 
 ## generate && deploy
 
-    ./rake generate && ./rake deploy
+    ./rake generate
+    ./rake deploy
