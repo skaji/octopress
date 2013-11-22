@@ -1,6 +1,7 @@
 ## install
 
     git clone --recursive git@github.com:shoichikaji/octopress.git
+    bundle install
 
 ## new post
 
