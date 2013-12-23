@@ -1,0 +1,51 @@
+---
+layout: post
+title: "cpanm の挙動"
+date: 2013-12-23 22:31:58 +0900
+comments: true
+categories: perl
+---
+
+ちょっと前から、cpanm は github にあるモジュールを直接インストールできるようになっている。
+ただ Makefile.PL を置いただけでは configure deps を
+インストールしてくれなかったので、deps を決めるあたりの cpanm の挙動をちょっと追ってみた。
+
+ソースはこのあたり。
+
+https://github.com/miyagawa/cpanminus/blob/devel/lib/App/cpanminus/script.pm#L2081
+
+1. configure deps の決定。
+    1. META.json/yml があった場合は、それから configure deps を決定。
+    1. Build.PL があった場合は Module::Build も configure deps に入れる。
+1. configure deps をインストール。
+1. perl Makefile.PL/Build.PL を実行。MYMETA.json/yml が作られる。(注：古い EU::MM, M::B は MYMETA を生成しない)
+1. option により build test runtime develop の中から install phase を決定。
+1. 上記のinstall phase に必要な deps を決定。
+    1. 下記のファイルのうち **最初に** 見つかったものから deps を決定。
+    `cpanfile, MYMETA.json/yml, _build/prereqs, Makefile`
+    1. インストールしたいモジュールの名前が Bundle から始まる場合は `=head CONTENTS` 以下のモジュールも deps に加える。
+1. deps をインストール。
+
+残りはモジュールのインストールへと入っていく。
+MYMETA の役割については
+
+http://www.dagolden.com/index.php/479/mymeta-yml-in-the-wild/
+
+に書いてある。
+
+個人的注目点は
+
+* configure deps は META.json/yml に書かれていないとだめ。
+* 逆に configure deps を気にしないなら、META.json/yml がなくても github からインストール可能。
+* configure 以外の deps を調べるときは META.json/yml を見ていない。
+* deps を調べるとき、cpanfile があれば (MYMETAではなく) そこから情報を得ている。よって
+`requires 'Dummy1', 0, git => 'git://github.com/shoichikaji/dummy1.git';`
+のように github にあるモジュールを deps にすることも可能ではある。
+
+
+だ。ただし、上で META.json/yml がなくても github からインストール可能と書いたが、
+META.json/yml がないと carton install でのインストールはできない。
+次は carton の挙動を追おう。
+
+
+
